@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cargar archivo CSV y crear gráfica</title>
+  <script src="Chart.js"></script>
+</head>
+<body>
+  <input type="file" id="csvFileInput" accept=".csv">
+  <canvas id="chartCanvas"></canvas>
+
+  <script>
+    document.getElementById('csvFileInput').addEventListener('change', handleFileSelect, false);
+
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        const csvData = e.target.result;
+        const chartData = parseCSV(csvData);
+
+        createChart(chartData);
+      };
+
+      reader.readAsText(file);
+    }
+
+    function parseCSV(csvData) {
+      const lines = csvData.split('\n');
+      const headers = lines[0].split('|');
+      const data = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const currentLine = lines[i].split('|');
+        const rowData = {};
+
+        for (let j = 0; j < headers.length; j++) {
+          rowData[headers[j]] = currentLine[j];
+        }
+
+        data.push(rowData);
+      }
+
+      return data;
+    }
+
+    function createChart(data) {
+      const ctx = document.getElementById('chartCanvas').getContext('2d');
+      const labels = data.map(row => row.d_asenta);
+      const values = data.map(row => row.d_CP);
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Códigos Postales',
+            data: values,
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 10000,
+              ticks: {
+                precision: 0
+              }
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

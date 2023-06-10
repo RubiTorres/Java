@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Consulta a API de Banxico</title>
+    <script src="Jquery.js"></script>
+</head>
+<body>
+    <h1>Consulta a API de Banxico</h1>
+
+    <label for="fechaInicio">Fecha de inicio:</label>
+    <input type="date" id="fechaInicio">
+
+    <label for="fechaFin">Fecha de fin:</label>
+    <input type="date" id="fechaFin">
+
+    <button onclick="realizarConsulta()">Realizar consulta</button>
+
+    <div id="resultado"></div>
+
+    <script>
+        function realizarConsulta() {
+            var fechaInicio = document.getElementById('fechaInicio').value;
+            var fechaFin = document.getElementById('fechaFin').value;
+
+            if (fechaInicio && fechaFin) {
+                var url = 'https://www.banxico.org.mx/SieAPIRest/service/v1/series/SF43718/datos/' 
+                + fechaInicio + '/' + fechaFin + '?token=11dd677ed626bf96a9627426a538eb4bd6d65ec56ab05fc32afa9e70074cd1a6';
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        mostrarResultado(data);
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            } else {
+                alert('Por favor, selecciona la fecha de inicio y fin.');
+            }
+        }
+
+        function mostrarResultado(data) {
+            var resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.innerHTML = '';
+
+            if (data.bmx.series.length > 0) {
+                var serie = data.bmx.series[0];
+                var registros = serie.datos;
+
+                if (registros.length > 0) {
+                    for (var i = 0; i < registros.length; i++) {
+                        resultadoDiv.innerHTML += registros[i].fecha + ': ' + registros[i].dato + '<br>';
+                    }
+                } else {
+                    resultadoDiv.innerHTML = 'No se encontraron registros.';
+                }
+            } else {
+                resultadoDiv.innerHTML = 'No se encontró la serie solicitada.';
+            }
+        }
+    </script>
+</body>
+</html>
